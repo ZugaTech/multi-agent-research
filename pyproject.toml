@@ -1,0 +1,24 @@
+[project]
+name = "multi-agent-research"
+version = "0.1.0"
+description = "Multi-Agent Research Assistant using LangChain"
+dependencies = [
+    "langchain",
+    "langchain-openai",
+    "openai",
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "beautifulsoup4",
+    "duckduckgo-search",
+    "google-search-results", # serpapi
+    "reportlab",
+    "pydantic",
+    "python-dotenv",
+    "typer",
+    "rich"
+]
+requires-python = ">=3.10"
+
+[project.scripts]
+research = "src.main:app"
