@@ -1,6 +1,6 @@
-# Multi-Agent Research Assistant 🧠📚
+﻿# Multi-Agent Research Assistant 🧠📚
 
-A, production-ready research orchestration system built with LangChain, FastAPI, and Typer. It deploys three specialized AI agents to automate the tedious process of searching, reading, synthesizing, and formatting deep research on any topic.
+A, production-ready research orchestration system built with LangChain, FastAPI and Typer. It deploys three specialized AI agents to automate the tedious process of searching, reading, synthesizing and formatting deep research on any topic.
 
 ## The Agents
 
@@ -11,7 +11,7 @@ A, production-ready research orchestration system built with LangChain, FastAPI,
 
 2. **Agent 2: The Analyst**
  - Reads each source independently and in parallel.
- - Extracts structured facts (JSON) including key points, relevant quotes, and calculates a credibility score.
+ - Extracts structured facts (JSON) including key points, relevant quotes and calculates a credibility score.
 
 3. **Agent 3: The Writer**
  - Synthesizes the extracted facts into a cohesive, academic report.
