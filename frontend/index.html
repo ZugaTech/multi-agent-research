@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Research Assistant</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --text: #212529;
+            --primary: #3b82f6;
+            --border: #dee2e6;
+            --surface: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .status-box {
+            display: none;
+            padding: 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+
+        .status-step {
+            margin: 0.5rem 0;
+            color: #166534;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .report {
+            display: none;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-section {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .report h2 {
+            color: var(--primary);
+            font-family: Georgia, serif;
+        }
+
+        .report-body {
+            font-family: Georgia, serif;
+            font-size: 1.1rem;
+        }
+
+        .sources {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Multi-Agent Research Assistant</h1>
+            <p>Enter a topic to generate a comprehensive, multi-source research report.</p>
+
+            <div class="form-group">
+                <label>Research Topic</label>
+                <input type="text" id="topicInput" placeholder="e.g. Impact of Quantum Computing on Cryptography">
+            </div>
+
+            <div class="form-group">
+                <label>Depth</label>
+                <select id="depthSelect">
+                    <option value="quick">Quick (5 sources)</option>
+                    <option value="standard" selected>Standard (10 sources)</option>
+                    <option value="deep">Deep (20 sources)</option>
+                </select>
+            </div>
+
+            <button id="submitBtn" onclick="startResearch()">Start Research</button>
+        </div>
+
+        <div id="statusBox" class="status-box">
+            <h3 style="margin-top:0">Research Progress</h3>
+            <div id="statusLog"></div>
+        </div>
+
+        <div id="reportBox" class="report">
+            <h1 id="rTitle"></h1>
+            <p style="color:#64748b" id="rMeta"></p>
+
+            <div class="report-section">
+                <h2>Executive Summary</h2>
+                <div id="rExec" class="report-body"></div>
+            </div>
+
+            <div id="rSections"></div>
+
+            <div class="report-section">
+                <h2>Sources</h2>
+                <ul id="rSources" class="sources"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function startResearch() {
+            const topic = document.getElementById('topicInput').value;
+            if (!topic) return;
+
+            const depth = document.getElementById('depthSelect').value;
+            const btn = document.getElementById('submitBtn');
+            const statusBox = document.getElementById('statusBox');
+            const statusLog = document.getElementById('statusLog');
+            const reportBox = document.getElementById('reportBox');
+
+            btn.disabled = true;
+            statusBox.style.display = 'block';
+            reportBox.style.display = 'none';
+            statusLog.innerHTML = `<div class="status-step"><span class="spinner"></span> Initializing agents...</div>`;
+
+            try {
+                // Initialize stream request via POST
+                const response = await fetch('http://localhost:8000/api/research/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, depth, output_format: 'both' })
+                });
+
+                // Read Server-Sent Events from the response stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // keep remainder
+
+                    let currentEvent = null;
+                    let currentData = null;
+
+                    for (const line of lines) {
+                        if (line.startsWith('event: ')) {
+                            currentEvent = line.substring(7).trim();
+                        } else if (line.startsWith('data: ')) {
+                            currentData = line.substring(6).trim();
+                            if (currentEvent === 'update' && currentData) {
+                                const session = JSON.parse(currentData);
+                                updateStatus(session, statusLog);
+
+                                if (session.status === 'completed' && session.report) {
+                                    renderReport(session.report);
+                                }
+                            } else if (currentEvent === 'error') {
+                                statusLog.innerHTML += `<div class="status-step" style="color:red">Error: ${currentData}</div>`;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                statusLog.innerHTML += `<div class="status-step" style="color:red">Failed to connect: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function updateStatus(session, logElem) {
+            const statusMap = {
+                'searching': '🔍 Agent 1 (Searcher) is scouring the web...',
+                'summarizing': '🧠 Agent 2 (Analyst) is reading and summarizing sources...',
+                'reporting': '📝 Agent 3 (Writer) is compiling the final report...',
+                'completed': '✅ Research complete!',
+                'failed': '❌ Research failed.'
+            };
+
+            const msg = statusMap[session.status] || session.status;
+
+            if (session.status === 'completed' || session.status === 'failed') {
+                logElem.innerHTML = `<div class="status-step">${msg}</div>`;
+            } else {
+                logElem.innerHTML = `<div class="status-step"><span class="spinner"></span> ${msg}</div>`;
+            }
+        }
+
+        function renderReport(report) {
+            document.getElementById('reportBox').style.display = 'block';
+            document.getElementById('statusBox').style.display = 'none';
+
+            document.getElementById('rTitle').textContent = report.title;
+            document.getElementById('rMeta').textContent = `Generated at ${report.generated_at} | ${report.word_count} words`;
+            document.getElementById('rExec').textContent = report.executive_summary;
+
+            const sectionsHtml = report.sections.map(sec => `
+                <div class="report-section">
+                    <h2>${sec.heading}</h2>
+                    <div class="report-body">${sec.content.replace(/\n\n/g, '<br><br>')}</div>
+                </div>
+            `).join('');
+            document.getElementById('rSections').innerHTML = sectionsHtml;
+
+            const sourcesHtml = report.sources.map(src => `
+                <li><a href="${src.url}" target="_blank">[${src.number}] ${src.title}</a> (${src.domain})</li>
+            `).join('');
+            document.getElementById('rSources').innerHTML = sourcesHtml;
+        }
+    </script>
+</body>
+
+</html>
