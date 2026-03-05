@@ -1,22 +1,22 @@
 # Multi-Agent Research Assistant 🧠📚
 
-A sophisticated, production-ready research orchestration system built with LangChain, FastAPI, and Typer. It deploys three specialized AI agents to automate the tedious process of searching, reading, synthesizing, and formatting deep research on any topic.
+A, production-ready research orchestration system built with LangChain, FastAPI, and Typer. It deploys three specialized AI agents to automate the tedious process of searching, reading, synthesizing, and formatting deep research on any topic.
 
 ## The Agents
 
 1. **Agent 1: The Searcher (ReAct)**
-   - Autonomously determines the best search queries.
-   - Uses DuckDuckGo (or SerpApi) to find relevant, recent sources.
-   - Fetches and cleans HTML from the live web using asynchronous HTTP requests.
+ - Autonomously determines the best search queries.
+ - Uses DuckDuckGo (or SerpApi) to find relevant, recent sources.
+ - Fetches and cleans HTML from the live web using asynchronous HTTP requests.
 
 2. **Agent 2: The Analyst**
-   - Reads each source independently and in parallel.
-   - Extracts structured facts (JSON) including key points, relevant quotes, and calculates a credibility score.
+ - Reads each source independently and in parallel.
+ - Extracts structured facts (JSON) including key points, relevant quotes, and calculates a credibility score.
 
 3. **Agent 3: The Writer**
-   - Synthesizes the extracted facts into a cohesive, academic report.
-   - Formats the output with embedded citations and an executive summary.
-   - Exports directly to Markdown and styled PDF using ReportLab.
+ - Synthesizes the extracted facts into a cohesive, academic report.
+ - Formats the output with embedded citations and an executive summary.
+ - Exports directly to Markdown and styled PDF using ReportLab.
 
 ## Quickstart
 
@@ -24,7 +24,7 @@ A sophisticated, production-ready research orchestration system built with LangC
 ```bash
 pip install -r requirements.txt
 # Or if using pyproject.toml:
-pip install .
+pip install.
 ```
 
 Configure your environment in `.env`:
